@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Google Maps</title>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.19.0.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>This Is A Test</h1>
+        <div id="map-canvas" style="width: 600px; height:400px"></div>
+    </div>
+
+    <script>
+        window.lat = 37.5407;
+        window.lng = -77.4360;
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(updatePosition);
+            }
+            return null;
+        };
+        function updatePosition(position) {
+            if (position) {
+                window.lat = position.coords.latitude;
+                window.lng = position.coords.longitude;
+            }
+        }
+        setInterval(function () { updatePosition(getLocation()); }, 10000);
+        function currentLocation() {
+            return { lat: window.lat, lng: window.lng };
+        };
+        var pnChannel = "map-channel";
+        var pubnub = new PubNub({
+            publishKey: 'pub-c-1ab68e6b-0de9-4592-97ca-277e9c3e67f9',
+            subscribeKey: 'sub-c-3dc5695e-e785-11e9-bb2e-da9fe90d7620'
+        });
+        pubnub.subscribe({ channels: [pnChannel] });
+        pubnub.addListener({ message: redraw });
+
+        window.lat = 37.5407;
+        window.lng = -77.4360;
+        function circlePoint(time) {
+            var radius = 0.01;
+            var x = Math.cos(time) * radius;
+            var y = Math.sin(time) * radius;
+            return { lat: window.lat + y, lng: window.lng + x };
+        };
+        var map;
+        var mark;
+        var initialize = function () {
+            map = new google.maps.Map(document.getElementById('map-canvas'), { center: { lat: lat, lng: lng }, zoom: 12 });
+            mark = new google.maps.Marker({ position: { lat: lat, lng: lng }, map: map });
+        };
+        window.initialize = initialize;
+        var redraw = function (payload) {
+            lat = payload.message.lat;
+            lng = payload.message.lng;
+            map.setCenter({ lat: lat, lng: lng, alt: 0 });
+            mark.setPosition({ lat: lat, lng: lng, alt: 0 });
+        };
+        setInterval(function () {
+            pubnub.publish({ channel: pnChannel, message: currentLocation() });
+        }, 5000);
+    </script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyDWm4n9wq6RT_8UwD-s5ZHUooj7w6AFTlc&callback=initialize"></script>
+
+</body>
+
+</html>
