@@ -14,6 +14,8 @@ const session = require("express-session");
 const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 
+
+
 const initializePassport = require("./passport-config")
 initializePassport(
 	passport, 
@@ -37,8 +39,21 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
 
+
+
+
+// Serve up static assets (usually on heroku)
+if (process.env.NODE_ENV === "production") {
+	app.use(express.static("client/build"));
+  }
+  
+  // Send every request to the React app
+  // Define any API routes before this runs
+  /*app.get("*", function(req, res) {
+	res.sendFile(path.join(__dirname, "./client/build"));
+  });*/
+
 //connecting to mongoDB
-// Connect to the Mongo DB
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/usericecreamtruck");
 
 app.get("/", checkAuthenticated, (req, res) => {
@@ -48,15 +63,15 @@ app.get("/", checkAuthenticated, (req, res) => {
 app.get("/login", checkNotAuthenticated, (req, res) => {
 	res.render("login.ejs")
 });
-/*app.post("/login", checkNotAuthenticated, passport.authenticate("local", {
+app.post("/login", checkNotAuthenticated, passport.authenticate("local", {
 	successRedirect: "/",
 	failureRedirect: "/login",
 	failureFlash: true
-}));*/
+}));
 
-app.post("/login", (req, res) => {
-	res.redirect("/");
-});
+//app.post("/login", (req, res) => {
+	//res.redirect("/");
+//}); 
 
 app.get("/register", checkNotAuthenticated, (req, res) => {
 	res.render("register.ejs")
@@ -85,15 +100,17 @@ app.delete("/logout", (req, res) => {
 
 function checkAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
-		return next()
+		return next();
 	}
 	res.redirect("/login");
 }
+
 
 function checkNotAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
 		return res.redirect('/');
 	}
 	next();
+	console.log("Something is broken");
 }
 app.listen(3000);
