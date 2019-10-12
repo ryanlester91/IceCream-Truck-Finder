@@ -1,6 +1,6 @@
-//currently:
-//defaults to login page with option to click link to redirect to register page 
-//redirects from register to login pages but the login page redirects to itself-- failureRedirect
+// //currently:
+// //defaults to login page with option to click link to redirect to register page 
+// //redirects from register to login pages but the login page redirects to itself-- failureRedirect
 if (process.env.NODE_ENV !=="production") {
 	require("dotenv").config();
 }
@@ -114,3 +114,7 @@ function checkNotAuthenticated(req, res, next) {
 	console.log("Something is broken");
 }
 app.listen(3000);
+
+server.js
+
+
