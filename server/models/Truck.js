@@ -6,6 +6,7 @@ const truckSchema = new Schema({
     location: { type: String, required: true },
    //or will location include latitude, longitude?
     // minutesUntil:
+    iceCreams: [{type: String, required: true}],
     date: { type: Date, default: Date.now }
    });
    const Truck = mongoose.model("Truck", truckSchema);
